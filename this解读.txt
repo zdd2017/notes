@@ -1,0 +1,43 @@
+this是Javascript语言的一个关键字。它代表函数运行时，自动生成的一个内部对象，只能在函数内部使用。随着函数使用场合的不同，this的值会发生变化。但是有一个总的原则，那就是this指的是，调用函数的那个对象。
+JavaScript中函数的调用有以下几种方式：作为对象方法调用，作为函数调用，作为构造函数调用，和使用 apply 或 call 调用。
+
+1.作为函数调用
+    var x = 1;
+　　function test(){
+　　　　alert(this.x);
+　　}
+　　test(); // 1
+this指向window
+在浏览器中setTimeout、setInterval和内部函数，即声明在一个函数体内的函数执行时的当前对象是全局对象window
+
+var name = "window";
+
+var Bob = {
+    name: "Bob",
+    showName: function(){
+        alert(this.name);
+    }
+};
+
+var Tom = {
+    name: "Tom",
+    showName: function(){
+        var fun = Bob.showName;
+        fun();
+    }
+};
+
+Tom.showName();　　//window
+
+2.作为对象方法调用
+指向该对象
+
+3.作为构造函数调用
+所谓构造函数，就是通过这个函数生成一个新对象（object）。这时，this就指这个新对象。
+function test(){
+　　　　this.x = 1;
+　　}
+　　var o = new test();
+　　alert(o.x); // 1
+
+4.apply和call会改变this指向，指向第一个参数。
