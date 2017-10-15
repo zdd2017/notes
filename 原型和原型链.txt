@@ -1,0 +1,81 @@
+构造函数：
+
+function Person(name, age, job) {
+ this.name = name;
+ this.age = age;
+ this.job = job;
+ this.sayName = function() { alert(this.name) } 
+}
+var person1 = new Person('Zaxlct', 28, 'Software Engineer');
+var person2 = new Person('Mick', 23, 'Doctor');
+
+person1与person2是构造函数Person的两个实例
+
+一切（引用类型）都是对象，对象是属性的集合。每当定义一个对象的时候，对象中都会包含一些预定义的属性，其中每个函数对象都有一个prototype属性，指向函数的原型对象。构造函数会自动为创建的新对象设置原型。而原型对象中默认会有constructor属性，指向构造函数。
+
+Person.prototype.constructor == Person
+
+当调用构造函数创建一个实例后，实例的内部将包含[[prototype]]指针，指向构造函数的原型对象，在脚本中没有标准的方式能访问[[prototype]]，但Firefox、Safari和Chrome在每个对象上都支持一个属性__proto__可以访问。
+
+任何对象都有__proto__属性。只有函数对象有prototype属性。
+
+person1.__proto__ = Person.prototype
+
+不过，要明确的真正重要的一点就是，这个连接存在于实例与构造函数的原型对象之间，而不是存在于实例与构造函数之间。
+
+person1.__proto__ == Person.prototype
+
+Person.__proto__ == Function.prototype
+
+Peron.prototype.__proto__ == Object.prototype
+
+Object.__proto__ == Function.prototype 
+
+所有函数对象的__proto__都指向Function.prototype。所有的构造器都来自于 Function.prototype，甚至包括根构造器Object及Function自身。所有构造器都继承了·Function.prototype·的属性及方法。如length、call、apply、bind
+
+Function.prototype.__proto__ === Object.prototype
+
+这说明所有的构造器也都是一个普通 JS 对象，可以给构造器添加/删除属性等。同时它也继承了Object.prototype上的所有方法：toString、valueOf、hasOwnProperty等。
+
+Object.prototype.__proto__ === null 
+
+原型的作用是继承，通过构造函数创建的实例可继承原型上的变量和方法。
+
+实现原型链的基本模式：
+function SuperType(){
+	this.property = true;
+}
+SuperType.prototype.getSuperValue = function(){
+	return this.property;
+}
+function SubType(){
+	this.subproperty = false;
+}
+//让SubType继承SuperType
+SubType.prototype = new SuperType();
+
+SubType.prototype.getSubValue = function(){
+	return this.subproperty;
+}
+
+var instance = new SubType();
+alert(instance.getSuperValue());   //true
+
+原型搜索机制：当以读取模式访问一个实例属性时，首先会在实例中搜索该属性，如果没有找到，则会继续搜索实例的原型。在通过原型链实现继承的情况下，搜索过程就得以沿着原型链继续向上。hasOwnProperty是Object.prototype的一个方法，它能判断一个对象是否包含自定义属性而不是原型链上的属性，因为hasOwnProperty 是 JavaScript 中唯一一个处理属性但是不查找原型链的函数。
+原型链的形成是真正是靠__proto__ 而非prototype
+
+var F=function(){};
+F.prototype.constructor === Object(F?) 
+F.constructor的构造函数 === Function
+所有普通对象都源于这个Object.prototype对象
+
+
+function A() {
+    this.do=function() {return ‘foo’;};
+}
+A.prototype=function() {
+    this.do=function() {return ‘bar’};
+};
+var x=new A().do();
+x 的值是：
+原型是函数怎么办

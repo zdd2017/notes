@@ -1,0 +1,50 @@
+把属性和方法封装成一个对象
+1.构造函数模式
+javascript提供了一种方法，可以利用构造函数生成实例来封装属性和方法。
+
+function Person(name, age){
+	this.name = name;
+	this.age = age;
+}
+
+var person1 = new Person('Jack', '29');
+var person2 = new Person('Rose', '27');
+
+alert(person1.name) //Jack
+alert(person2.name) //Rose 
+
+person1和person2都有一个constructor属性指向Person
+Js还提供了instanceof 运算符来验证构造函数与实例之间的联系
+alert(person1 instanceof Person) //true;
+alert(person1 instanceof Object) //true; person1同时也是Object的实例
+
+构造函数的问题：
+function Person(name, age){
+	this.name = name;
+	this.age = age;
+	this.school = 'Titanic';
+	this.sayHi = function(){
+	  alert('hi')
+	}
+}
+var person1 = new Person('Jack', '29');
+var person2 = new Person('Rose', '27');
+
+person1.sayHi() //hi
+person2.sayHi() //hi
+
+每创建一个实例，school属性和sayHi方法都是一样的内容，会浪费内存。我们的目的是让实例中相同的属性和方法能够指向同一个内存地址。这可以通过Prototype模式来实现。
+
+2.Prototype模式
+function Person(name, age){
+	this.name = name;
+	this.age = age;
+}
+Person.prototype.school = 'Titanic';
+Person.sayHi = function(){
+	alert('hi');
+};
+var person1 = new Person('Jack', '29');
+var person2 = new Person('Rose', '27');
+
+这样person1和person2的school属性和sayHi方法指向的就是同一个对象，Person的ptototype对象。

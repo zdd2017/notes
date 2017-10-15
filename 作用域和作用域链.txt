@@ -1,0 +1,169 @@
+作用域是指变量和函数的可访问范围，在js中，作用域分为全局作用域和局部作用域。全局作用域里的对象在代码中任意位置都能访问到，而局部作用域的对象只有在特定局部位置能访问。如：
+
+var a = 1;
+function show(){
+	var b = 2;
+	console.log(a);
+	console.log(b);
+} 
+console.log(a); // 1
+console.log(b); //出错
+show(); // 1 2
+
+一般来说，以下几种情形的对象拥有全局作用域：
+1.在最外层环境（在Web浏览器中是window对象）中定义的变量；
+2.没有使用var直接赋值的变量
+3.所有window对象的属性
+
+作用域链
+每次当控制器转到ECMAScript可执行代码的时候，即会进入到一个执行环境(execution context)。每个执行环境都有与之关联的变量对象(variable object，缩写为VO),它是执行环境的一个属性，存储着变量、函数以及函数的形参。
+var a = 10;
+ 
+function test(x) {
+  var b = 20;
+};
+ 
+test(30);
+对应的变量对象是：
+
+// 全局执行环境的变量对象
+VO(globalContext) = {
+  a: 10,
+  test: <reference to function>
+};
+ 
+// test函数执行环境的变量对象 
+VO(test functionContext) = {
+  x: 30,
+  b: 20
+};
+只有全局环境的变量对象允许通过VO的属性名称来间接访问(因为在全局环境里，全局对象自身就是变量对象)，在其它执行环境中是不能直接访问VO对象的，因为它只是内部机制的一个实现，此时由活动对象(activation object,缩写为AO)扮演VO的角色。在一个函数被调用的时候，会创建一个活动对象，它通过函数的arguments属性初始化，即活动对象在一开始只包含arguments对象这一个变量。
+
+函数执行完毕后，局部活动对象就会被销毁，内存中仅保存全局作用域（全局执行环境的变量对象）。
+
+全局执行环境是最外围的执行环境，每个函数都有自己的执行环境，执行环境有两个阶段：创建和执行阶段。
+1.创建阶段（函数被调用还没被执行）
+function test(a, b) {
+  var c = 10;
+  function d() {}
+  var e = function _e() {};
+  (function x() {});
+}
+ 
+test(10); // call
+当进入带有参数10的test函数上下文时，AO表现为如下：
+
+AO(test) = {
+  a: 10,
+  b: undefined,
+  c: undefined,
+  d: <reference to FunctionDeclaration "d">
+  e: undefined
+};
+注意，AO里并不包含函数“x”。这是因为“x” 是一个函数表达式，而不是函数声明，函数表达式不会影响VO。
+2.执行阶段
+AO/VO在代码执行阶段被修改如下：
+
+AO['c'] = 10;
+AO['e'] = <reference to FunctionExpression "_e">;
+
+作用域链是内部执行环境所有变量对象（包括父变量对象）的集合，它决定了哪些数据能被函数访问，用于在标识符解析中查找变量。
+
+在定义一个函数的时候，这个函数的[[scope]]属性被存储，且一直存在，直到函数被销毁。[[scope]]属性值是一个数组，数组元素是AO/VO，当数组包含多个项时就形成了scope chain(原型链)。即便不调用，[[scope]]属性也一直存储在函数对象中。比如创建一个函数
+
+function add(num1, num2){
+	return num1+num2;
+}
+
+add.[[Scope]] = [
+  globalContext.VO // === Global
+];
+
+add(1, 2)
+
+进入执行环境创建AO/VO之后，执行环境的Scope属性（变量查找的一个作用域链）作如下定义：
+
+Scope = AO|VO + [[Scope]]
+
+意思是：活动对象是作用域数组的第一个对象，即添加到作用域的前端。
+
+Scope = [AO].concat([[Scope]]);
+
+标识符解析是沿着作用域链一级一级地搜索标识符的过程，搜索过程始终从作用域的前端开始，然后逐级向上，直至找到标识符为止。
+
+我们用一个稍微复杂的例子描述上面讲到的这些。
+
+var x = 10;
+ 
+function foo() {
+  var y = 20;
+ 
+  function bar() {
+    var z = 30;
+    alert(x +  y + z);
+  }
+ 
+  bar();
+}
+ 
+foo(); // 60
+对此，我们有如下的变量/活动对象，函数的的[[scope]]属性以及上下文的作用域链：
+
+全局上下文的变量对象是：
+
+globalContext.VO === Global = {
+  x: 10
+  foo: <reference to function>
+};
+在“foo”创建时，“foo”的[[scope]]属性是：
+
+foo.[[Scope]] = [
+  globalContext.VO
+];
+在“foo”激活时（进入上下文），“foo”上下文的活动对象是：
+
+fooContext.AO = {
+  y: 20,
+  bar: <reference to function>
+};
+“foo”上下文的作用域链为：
+
+fooContext.Scope = fooContext.AO + foo.[[Scope]] // i.e.:
+ 
+fooContext.Scope = [
+  fooContext.AO,
+  globalContext.VO
+];
+内部函数“bar”创建时，其[[scope]]为：
+
+bar.[[Scope]] = [
+  fooContext.AO,
+  globalContext.VO
+];
+在“bar”激活时，“bar”上下文的活动对象为：
+
+barContext.AO = {
+  z: 30
+};
+“bar”上下文的作用域链为：
+
+barContext.Scope = barContext.AO + bar.[[Scope]] // i.e.:
+ 
+barContext.Scope = [
+  barContext.AO,
+  fooContext.AO,
+  globalContext.VO
+];
+对“x”、“y”、“z”的标识符解析如下：
+
+- "x"
+-- barContext.AO // not found
+-- fooContext.AO // not found
+-- globalContext.VO // found - 10
+
+- "y"
+-- barContext.AO // not found
+-- fooContext.AO // found - 20
+
+- "z"
+-- barContext.AO // found - 30

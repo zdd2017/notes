@@ -1,0 +1,104 @@
+function f1(){
+　　var n=1;
+　　function f2(){
+　　　　console.log(n); 
+　　}
+　　return f2;
+}
+
+var result=f1();
+result(); // 1
+
+这里f2可以获取到n，f1()执行结果就是f2,所以result=f2,result()相当于f2()，结果打印出1。注意：这里n在函数外部是访问不到的，只能通过调用f2()间接访问。
+函数f2即闭包，闭包是能够读取其他函数内部变量的函数。它的最大用处有两个，一个是可以读取函数内部的变量，另一个就是让这些变量的值始终保持在内存中。
+一般来说，函数执行完毕后，局部活动对象就会被销毁，内存中仅保存全局作用域（全局执行环境的变量对象），但闭包情况有所不同。当外部函数执行完毕后，其内部的匿名函数（即闭包）仍在引用它的活动对象，外部函数的作用域链虽然被销毁了，但它的活动对象不会被销毁，仍然保存在内存中，直到匿名函数被销毁。
+
+（疑问，匿名函数执行完毕以后活动对象也没有被销毁是怎么回事？是因为闭包被赋值给了一个全局变量才导致活动对象一直存在于内存中吗？）
+
+function buildList(list) {
+    var result = [];
+    for (var i = 0; i < list.length; i++) {
+        var item = 'item' + list[i];
+        result.push( function() {alert(item + ' ' + list[i])} );//list[i]为什么是undefined?
+    }
+    return result;
+}
+ 
+function testList() {
+    var fnlist = buildList([1,2,3]);
+    // using j only to help prevent confusion - could use i
+    for (var j = 0; j < fnlist.length; j++) {
+        fnlist[j]();
+    }
+}
+
+
+
+var animal = function(){};
+    var dog = function(){};
+    animal.price = 2000;
+    dog.prototype = animal;
+    var tidy = new dog();
+    console.log(dog.price); //undefined
+    console.log(tidy.price); // 2000
+    /* 首先 dog.prototype = animal;这里没有问题的， 我们可以赋值任何类型的对象到原型上，但是不能赋值原子类型的值，
+     比如如下代码是无效的： Foo.prototype = 1;将 animal的值赋给dog的原型对象。 console.log(dog.price);针对这句代码。
+     首先是dog自己的本身的函数是没price这个属性的，然后原型上有，但是两者是没有任何关系的。它先通过查找自生，然后再循着
+     __proto__去原型链中寻找。都没有所以读取不到。看个例子：*/
+     var Animal = function(){};
+     Animal.prototype.say = function(){
+     alert("a");
+     };
+     Animal.say(); //Animal.say is not a function
+/*所以读取不到这个值，之后  console.log(tidy.price);
+ */
+tidy.__proto__= dog.prototype=animal;//tidy的原型链找到了animal；所以tidy.price==2000
+
+    var animal = function(){};
+    var dog = function(){};
+
+    animal.price = 2000;
+    dog.__proto__ = animal;
+    var tidy = new dog();
+
+    console.log(dog.price) //2000
+    console.log(tidy.price) // undefined
+    /* dog.__proto__ = animal;直接找到 animal，获取值dog.price==2000；
+     tidy.__proto__= dog.prototype;
+     tidy.__proto__.__proto__ === dog.prototype.__proto__=== Object.prototype;
+     她一直循着链子寻找，找到了dog的，然后再往上找就是全局Object.prototype的了。找不到animal的所以
+     console.log(tidy.price) // undefined
+     */
+    
+
+    代码一
+
+<script type="text/javascript">
+
+var animal = function(){};
+var dog = function(){};
+
+animal.price = 2000;
+dog.__proto__ = animal;
+var tidy = new dog();
+
+console.log(dog.price) //2000
+console.log(tidy.price) // undefined
+
+</script>
+代码二
+
+<script type="">
+
+var animal = function(){};
+var dog = function(){};
+
+animal.price = 2000;
+dog.prototype = animal;
+var tidy = new dog();
+
+console.log(dog.price) //undefined
+console.log(tidy.price) // 2000
+
+</script>
+    原型链继承的本质是通过__proto__这个属性，而不是prototype,prototype只是提供了实例的构造函数与原型对象的联系，构造函数并不能继承原型上的属性。

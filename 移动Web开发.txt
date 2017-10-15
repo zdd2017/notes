@@ -1,0 +1,101 @@
+移动Web开发分为三种：
+一.Native App(原生APP)：完全使用移动设备系统写的客户端（Java/Objective-C/Swift）
+
+二.Web APP(HTML+CSS+JS)
+
+三.Hybrid APP
+
+一.三尚未接触，重点先放在二上，即Web APP HTML5开发。
+
+1.在<head>头标签里一般会加上 viewport 让布局在移动端显示得更好
+<meta name="viewport"
+      content="width=device-width,
+               height=device-height,
+               inital-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no;"
+/>
+width: viewport的宽度
+height: viewport的高度
+initial-scale: 初始的缩放比例
+maximum-scale: 允许用户缩放的最大比例
+minimum-scale: 允许用户缩放的最小比例
+user-scalable: 是否允许用户手动缩放
+
+2.区分横屏竖屏
+CSS方法：
+
+写在同一个CSS文件里
+@media screen and (orientation: portrait){
+	/*竖屏模式下的CSS代码*/
+}
+@media screen and (orientation: landscape){
+	/*横屏模式下的CSS代码*/
+}
+
+分开写在两个CSS文件里
+<link media="all and (orientation:portrait)" type="text/css" href="portrait.css">
+<link media="all and (orientation:landscape) type="text/css" href="landscape.css">
+
+js方法：
+window.addEventListener("onorientationchange", function(){
+	if(window.orientation === 180 || window.orientation === 0){
+	  //竖屏
+	}
+	if(windwo.orientation === 90 || window.orientation === -90){
+	  //横屏
+	}
+}, false);
+
+3.Flex伸缩布局
+http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html
+
+4.响应式设计
+(1)媒体查询(CSS技术)
+对设备提出询问（称作表达式）开始，如果表达式结果为真，媒体查询中的CSS被应用，如果表达式结果为假，媒体查询内的CSS将被忽略。
+
+@media screen and (min-width: 600px){
+	/*在CSS中使用媒体查询*/
+}
+
+在样式表链接中使用媒体查询
+<link rel="stylesheet" href="styles/widerscreen.css" media="screen and (min-width:600px)">
+
+媒体查询可以查询许多媒体特性，如：视口宽度(width)和高度(height)(最常用)、屏幕宽度(device-width)和高度(device-height)、方向(orientation)、宽高比和分辨率等。
+
+(2)流体布局
+布局类型有4种：固定宽度布局，流体布局，弹性布局和混合布局
+流体布局利用百分比设置宽度，只能出现在width,margin,padding,对height,border没用
+注意box-sizing的使用
+
+(3)自适应的图片/视频等资源素材
+svg(可伸缩矢量图)：图像在改变尺寸的情况下不会失真
+
+5.交互
+为什么移动端不用click?
+因为移动端的click有300ms的延迟问题，点击屏幕后，要等待300ms确认没有二次点击（二次点击是缩放功能）,用户体验不好。
+使用fastclick库可以解决延迟问题，还可以防止穿透，即点击会触发非当前层的点击事件。（跨页面穿透除外）
+
+touch类
+touchstart: 手指触摸到屏幕触发
+touchmove: 手指在屏幕上移动触发
+touchend: 手指离开屏幕触发
+touchcancel: 系统打断touch行为（如alert）触发
+
+tap类
+tap: 手指碰一下屏幕触发
+longTap: 手指长按屏幕触发
+singleTap: 单击屏幕触发
+doubleTap: 双击屏幕触发
+
+swipe类
+swipe: 手指在屏幕上滑动触发
+swipeLeft: 手指在屏幕上向左滑动触发
+swipeRight: 手指在屏幕上向右滑动触发
+swipeUp: 手指在屏幕上向上滑动触发
+swipeDown: 手指在屏幕上向下滑动触发
+
+
+
+参考：
+http://blog.csdn.net/xiaoxiangyu5/article/details/49887065
